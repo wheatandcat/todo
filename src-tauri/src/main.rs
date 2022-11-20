@@ -12,6 +12,7 @@ fn greet(name: &str) -> String {
 use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 
 fn main() {
+    let context = tauri::generate_context!();
     let about = CustomMenuItem::new("about".to_string(), "todoについて");
     let update = CustomMenuItem::new("update".to_string(), "アップデートを確認");
     let quit = CustomMenuItem::new("quit".to_string(), "todoを閉じる");
@@ -19,7 +20,7 @@ fn main() {
     let import = CustomMenuItem::new("import".to_string(), "インポート");
     let mainmenu = Submenu::new(
         "todo",
-        Menu::new()
+        tauri::Menu::os_default(&context.package_info().name)
             .add_item(about)
             .add_item(update)
             .add_native_item(MenuItem::Separator)
@@ -45,6 +46,6 @@ fn main() {
             }
             _ => {}
         })
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("error while running tauri application");
 }
