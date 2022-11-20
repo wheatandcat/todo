@@ -1,13 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
-import { ListItem, Paragraph, Text } from "mdast";
-import { Node, visit } from "unist-util-visit";
-import Markdown from "markdown-to-jsx";
+import { Node } from "unist-util-visit";
 import { unified, VFileWithOutput } from "unified";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import Tabs from "./components/organisms/Tabs";
 import History from "./components/organisms/History";
+import Editor from "./components/organisms/Editor";
 import dayjs from "./lib/dayjs";
+import { getTasks } from "./lib/task";
+import { STORAGE_KEY, getJsonParse } from "./lib/storage";
+import { dialog } from "@tauri-apps/api";
+import { listen } from "@tauri-apps/api/event";
 import "./App.css";
 import "./index.css";
 
@@ -18,54 +21,11 @@ export type Task = {
   checkedAt: string | null;
 };
 
-var tasks: Task[] = JSON.parse(String(localStorage.getItem("taskList"))) || [];
-
-const getTasks = (root: Node) => {
-  const items: Task[] = [];
-
-  visit(root, "listItem", (node: ListItem) => {
-    const paragraph = node.children.find((v) => v.type === "paragraph");
-    if (!paragraph) return;
-
-    const text = (paragraph as Paragraph).children.find(
-      (v) => v.type === "text"
-    ) as Text;
-    if (!text || !text.value) return;
-
-    const checked = text.value.includes("[x]");
-    if (!checked) {
-      if (!text.value.includes("[ ]")) return;
-    }
-
-    const item: Task = {
-      text: "",
-      depth: paragraph.position?.start?.column || 0,
-      checked,
-      checkedAt: null,
-    };
-
-    if (checked) {
-      item.text = text.value.replace("[x]", "").trim();
-    } else {
-      item.text = text.value.replace("[ ]", "").trim();
-    }
-
-    const checkedAt = tasks.find(
-      (v) => v.text.trim() === item.text.trim()
-    )?.checkedAt;
-    if (checkedAt) {
-      item.checkedAt = checkedAt;
-    }
-
-    items.push(item);
-  });
-
-  return items;
-};
+var tasks: Task[] = getJsonParse(STORAGE_KEY.TASK_LIST);
 
 function remarkTasks() {
   return (node: Node, file: VFileWithOutput<any>) => {
-    file.data.taskList = getTasks(node);
+    file.data.taskList = getTasks(node, tasks);
   };
 }
 
@@ -77,12 +37,26 @@ const processor = unified()
 function App() {
   const [select, setSelect] = useState(0);
   const [markdown, setMarkdown] = useState(
-    localStorage.getItem("markdown") || ""
+    localStorage.getItem(STORAGE_KEY.MARKDOWN) || ""
   );
 
-  const [history, setHistory] = useState(
-    JSON.parse(String(localStorage.getItem("history"))) || []
-  );
+  const [history, setHistory] = useState(getJsonParse(STORAGE_KEY.HISTORY));
+
+  useEffect(() => {
+    let unlisten: any;
+    async function f() {
+      unlisten = await listen<string>("about", () => {
+        dialog.message("Copyright © 2022 wheatandcat", "This is a todo app.");
+      });
+    }
+    f();
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, []);
 
   const addHistoryValue = useCallback((tasks: Task[]) => {
     const h = tasks.filter((v) => {
@@ -100,14 +74,14 @@ function App() {
     const items = [...(history ?? []), ...h];
 
     setHistory(items);
-    localStorage.setItem("history", JSON.stringify(items));
+    localStorage.setItem(STORAGE_KEY.HISTORY, JSON.stringify(items));
 
     const historyTextList = h.map((v) => v.text);
 
     tasks = tasks.filter((v) => {
       return !historyTextList.includes(v.text);
     });
-    localStorage.setItem("taskList", JSON.stringify(tasks));
+    localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(tasks));
 
     const m = markdown
       .split("\n")
@@ -119,16 +93,16 @@ function App() {
       .join("\n");
 
     setMarkdown(m);
-    localStorage.setItem("markdown", m);
+    localStorage.setItem(STORAGE_KEY.MARKDOWN, m);
   }, []);
 
   const setValue = useCallback((value: string) => {
     setMarkdown(value);
-    localStorage.setItem("markdown", value);
+    localStorage.setItem(STORAGE_KEY.MARKDOWN, value);
 
     const file = processor.processSync(value);
     const ts = file.data.taskList as Task[];
-    localStorage.setItem("taskList", JSON.stringify(ts));
+    localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(ts));
 
     tasks = ts;
     addHistoryValue(tasks);
@@ -148,10 +122,40 @@ function App() {
     []
   );
 
+  const onChangeTask = useCallback((checked: boolean, taskText: string) => {
+    tasks = tasks.map((v) => {
+      if (v.text === taskText.trim()) {
+        // この時点ではチェックが入っていないので、チェックが入っているときはチェックが入った日時を記録する
+        if (!checked) {
+          v.checkedAt = dayjs().toString();
+        } else {
+          v.checkedAt = null;
+        }
+      }
+
+      return v;
+    });
+
+    const m = markdown
+      .split("\n")
+      .map((v) => {
+        if (v.includes(taskText)) {
+          if (checked) {
+            return v.replace("[x]", "[ ]");
+          } else {
+            return v.replace("[ ]", "[x]");
+          }
+        }
+        return v;
+      })
+      .join("\n");
+
+    setMarkdown(m);
+  }, []);
+
   return (
-    <div className="container max-w-screen-lg">
-      <h1 className="text-3xl font-bold text-left px-4">TODO LIST</h1>
-      <br />
+    <div className="pt-4 max-w-screen-lg">
+      <div className="text-3xl font-bold text-left px-4 pb-3">TODO LIST</div>
       <Tabs
         items={["プレビュー", "編集", "履歴"]}
         selectedIndex={select}
@@ -160,81 +164,7 @@ function App() {
 
       {(() => {
         if (select === 0) {
-          return (
-            <div className="border text-left px-5 py-4 mx-4 my-3 h-96">
-              <Markdown
-                options={{
-                  overrides: {
-                    li: {
-                      component: (props) => {
-                        if (!props.children) return null;
-                        const c0 = props.children[0];
-
-                        if (typeof c0 === "string") {
-                          return <li>{props.children}</li>;
-                        }
-
-                        const checked = c0.props.checked;
-                        const taskText = props.children[1];
-
-                        return (
-                          <li {...props}>
-                            <label>
-                              <div className="flex items-center">
-                                <div className="pr-2 pt-1">
-                                  <input
-                                    type="checkbox"
-                                    defaultChecked={checked}
-                                    aria-labelledby="task item"
-                                    readOnly={false}
-                                    onChange={() => {
-                                      tasks = tasks.map((v) => {
-                                        if (v.text === taskText.trim()) {
-                                          // この時点ではチェックが入っていないので、チェックが入っているときはチェックが入った日時を記録する
-                                          if (!checked) {
-                                            v.checkedAt = dayjs().toString();
-                                          } else {
-                                            v.checkedAt = null;
-                                          }
-                                        }
-
-                                        return v;
-                                      });
-
-                                      const m = markdown
-                                        .split("\n")
-                                        .map((v) => {
-                                          if (v.includes(taskText)) {
-                                            if (checked) {
-                                              return v.replace("[x]", "[ ]");
-                                            } else {
-                                              return v.replace("[ ]", "[x]");
-                                            }
-                                          }
-                                          return v;
-                                        })
-                                        .join("\n");
-
-                                      setMarkdown(m);
-                                    }}
-                                  />
-                                </div>
-                                <div>
-                                  <span>{taskText}</span>
-                                </div>
-                              </div>
-                            </label>
-                          </li>
-                        );
-                      },
-                    },
-                  },
-                }}
-              >
-                {markdown}
-              </Markdown>
-            </div>
-          );
+          return <Editor markdown={markdown} onChangeTask={onChangeTask} />;
         } else if (select === 1) {
           return (
             <div className="border text-left mx-4 my-3 h-96">
