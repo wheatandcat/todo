@@ -38,6 +38,10 @@ fn main() {
                 let window = event.window();
                 window.emit("about", "about".to_string()).unwrap();
             }
+            "export" => {
+                let window = event.window();
+                window.emit("export", "export".to_string()).unwrap();
+            }
             "quit" => {
                 std::process::exit(0);
             }

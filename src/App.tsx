@@ -5,12 +5,14 @@ import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import Tabs from "./components/organisms/Tabs";
 import History from "./components/organisms/History";
-import Editor from "./components/organisms/Editor";
+import Preview from "./components/organisms/Preview";
 import dayjs from "./lib/dayjs";
 import { getTasks } from "./lib/task";
 import { STORAGE_KEY, getJsonParse } from "./lib/storage";
 import { dialog } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
+import { save } from "@tauri-apps/api/dialog";
+import { writeTextFile } from "@tauri-apps/api/fs";
 import "./App.css";
 import "./index.css";
 
@@ -40,61 +42,86 @@ function App() {
     localStorage.getItem(STORAGE_KEY.MARKDOWN) || ""
   );
 
-  const [history, setHistory] = useState(getJsonParse(STORAGE_KEY.HISTORY));
+  const [history, setHistory] = useState<Task[]>(
+    getJsonParse(STORAGE_KEY.HISTORY)
+  );
 
   useEffect(() => {
-    let unlisten: any;
+    let unListenAbout: any;
+    let unListenExport: any;
     async function f() {
-      unlisten = await listen<string>("about", () => {
+      unListenAbout = await listen<string>("about", () => {
         dialog.message("Copyright © 2022 wheatandcat", "This is a todo app.");
+      });
+      unListenExport = await listen<string>("export", async () => {
+        const m = localStorage.getItem(STORAGE_KEY.MARKDOWN) || "";
+        const h = getJsonParse(STORAGE_KEY.HISTORY);
+        const t = getJsonParse(STORAGE_KEY.TASK_LIST);
+        const data = {
+          markdown: m,
+          history: h,
+          tasks: t,
+        };
+
+        const path = await save({ defaultPath: "export-todo.json" });
+        if (path) {
+          writeTextFile(path, JSON.stringify(data));
+        }
       });
     }
     f();
 
     return () => {
-      if (unlisten) {
-        unlisten();
+      if (unListenAbout) {
+        unListenAbout();
+      }
+      if (unListenExport) {
+        unListenExport();
       }
     };
   }, []);
 
-  const addHistoryValue = useCallback((tasks: Task[]) => {
-    const h = tasks.filter((v) => {
-      if (!v.checkedAt) {
-        return false;
+  const addHistoryValue = useCallback(
+    (markdownValue: string, tasks: Task[]) => {
+      const h = tasks.filter((v) => {
+        if (!v.checkedAt) {
+          return false;
+        }
+
+        return dayjs().diff(dayjs(v.checkedAt), "hour") > 12;
+      });
+
+      if (h.length === 0) {
+        return;
       }
 
-      return dayjs().diff(dayjs(v.checkedAt), "hour") > 12;
-    });
+      setHistory((v) => {
+        const items = [...(v ?? []), ...h];
+        localStorage.setItem(STORAGE_KEY.HISTORY, JSON.stringify(items));
+        return items;
+      });
 
-    if (h.length === 0) {
-      return;
-    }
+      const historyTextList = h.map((v) => v.text);
 
-    const items = [...(history ?? []), ...h];
+      tasks = tasks.filter((v) => {
+        return !historyTextList.includes(v.text);
+      });
+      localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(tasks));
 
-    setHistory(items);
-    localStorage.setItem(STORAGE_KEY.HISTORY, JSON.stringify(items));
+      const m = markdownValue
+        .split("\n")
+        .filter((v) => {
+          const ng = historyTextList.find((t) => v.includes(t));
 
-    const historyTextList = h.map((v) => v.text);
+          return !ng;
+        })
+        .join("\n");
 
-    tasks = tasks.filter((v) => {
-      return !historyTextList.includes(v.text);
-    });
-    localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(tasks));
-
-    const m = markdown
-      .split("\n")
-      .filter((v) => {
-        const ng = historyTextList.find((t) => v.includes(t));
-
-        return !ng;
-      })
-      .join("\n");
-
-    setMarkdown(m);
-    localStorage.setItem(STORAGE_KEY.MARKDOWN, m);
-  }, []);
+      setMarkdown(m);
+      localStorage.setItem(STORAGE_KEY.MARKDOWN, m);
+    },
+    [history]
+  );
 
   const setValue = useCallback((value: string) => {
     setMarkdown(value);
@@ -105,7 +132,7 @@ function App() {
     localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(ts));
 
     tasks = ts;
-    addHistoryValue(tasks);
+    addHistoryValue(value, tasks);
   }, []);
 
   useEffect(() => {
@@ -122,36 +149,39 @@ function App() {
     []
   );
 
-  const onChangeTask = useCallback((checked: boolean, taskText: string) => {
-    tasks = tasks.map((v) => {
-      if (v.text === taskText.trim()) {
-        // この時点ではチェックが入っていないので、チェックが入っているときはチェックが入った日時を記録する
-        if (!checked) {
-          v.checkedAt = dayjs().toString();
-        } else {
-          v.checkedAt = null;
-        }
-      }
-
-      return v;
-    });
-
-    const m = markdown
-      .split("\n")
-      .map((v) => {
-        if (v.includes(taskText)) {
-          if (checked) {
-            return v.replace("[x]", "[ ]");
+  const onChangeTask = useCallback(
+    (checked: boolean, taskText: string) => {
+      tasks = tasks.map((v) => {
+        if (v.text === taskText.trim()) {
+          // この時点ではチェックが入っていないので、チェックが入っているときはチェックが入った日時を記録する
+          if (!checked) {
+            v.checkedAt = dayjs().add(-14, "hour").toString();
           } else {
-            return v.replace("[ ]", "[x]");
+            v.checkedAt = null;
           }
         }
-        return v;
-      })
-      .join("\n");
 
-    setMarkdown(m);
-  }, []);
+        return v;
+      });
+
+      const m = markdown
+        .split("\n")
+        .map((v) => {
+          if (v.includes(taskText)) {
+            if (checked) {
+              return v.replace("[x]", "[ ]");
+            } else {
+              return v.replace("[ ]", "[x]");
+            }
+          }
+          return v;
+        })
+        .join("\n");
+
+      setMarkdown(m);
+    },
+    [markdown]
+  );
 
   return (
     <div className="pt-4 max-w-screen-lg">
@@ -164,7 +194,7 @@ function App() {
 
       {(() => {
         if (select === 0) {
-          return <Editor markdown={markdown} onChangeTask={onChangeTask} />;
+          return <Preview markdown={markdown} onChangeTask={onChangeTask} />;
         } else if (select === 1) {
           return (
             <div className="border text-left mx-4 my-3 h-96">
@@ -177,7 +207,13 @@ function App() {
             </div>
           );
         } else {
-          return <History items={history} />;
+          return (
+            <History
+              items={history.sort((a, b) =>
+                dayjs(a.checkedAt).isBefore(dayjs(b.checkedAt)) ? 1 : -1
+              )}
+            />
+          );
         }
       })()}
     </div>

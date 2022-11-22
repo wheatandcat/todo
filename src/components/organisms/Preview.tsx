@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Markdown from "markdown-to-jsx";
 
 type Props = {
@@ -6,9 +6,9 @@ type Props = {
   onChangeTask: (checked: boolean, taskText: string) => void;
 };
 
-const Editor: React.FC<Props> = ({ markdown, onChangeTask }) => {
+const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
   return (
-    <div className="border text-left px-5 py-4 mx-4 my-3 h-96">
+    <div className="border text-left px-5 py-4 mx-4 my-3 min-h-96">
       <Markdown
         options={{
           overrides: {
@@ -57,4 +57,4 @@ const Editor: React.FC<Props> = ({ markdown, onChangeTask }) => {
   );
 };
 
-export default Editor;
+export default memo(Preview);

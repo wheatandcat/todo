@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 type Props = {
   items: string[];
@@ -34,4 +34,4 @@ const Tabs: React.FC<Props> = (props) => {
   );
 };
 
-export default Tabs;
+export default memo(Tabs);
