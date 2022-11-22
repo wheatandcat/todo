@@ -155,7 +155,7 @@ function App() {
         if (v.text === taskText.trim()) {
           // この時点ではチェックが入っていないので、チェックが入っているときはチェックが入った日時を記録する
           if (!checked) {
-            v.checkedAt = dayjs().add(-14, "hour").toString();
+            v.checkedAt = dayjs().toString();
           } else {
             v.checkedAt = null;
           }
