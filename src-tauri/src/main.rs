@@ -16,10 +16,10 @@ fn main() {
     let about = CustomMenuItem::new("about".to_string(), "About");
     let update = CustomMenuItem::new("update".to_string(), "Check for updates");
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-    let export = CustomMenuItem::new("export".to_string(), "Export");
-    let import = CustomMenuItem::new("import".to_string(), "Import");
+    let export = CustomMenuItem::new("export".to_string(), "Export").accelerator("Cmd+Shift+E");
+    let import = CustomMenuItem::new("import".to_string(), "Import").accelerator("Cmd+Shift+I");
     let mainmenu = Submenu::new(
-        "todo",
+        "Todo",
         Menu::new()
             .add_native_item(MenuItem::About(
                 "todo".to_string(),
