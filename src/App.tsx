@@ -9,10 +9,7 @@ import Preview from "./components/organisms/Preview";
 import dayjs from "./lib/dayjs";
 import { getTasks } from "./lib/task";
 import { STORAGE_KEY, getJsonParse } from "./lib/storage";
-import { dialog } from "@tauri-apps/api";
-import { listen } from "@tauri-apps/api/event";
-import { save } from "@tauri-apps/api/dialog";
-import { writeTextFile } from "@tauri-apps/api/fs";
+import useListen from "./hooks/useListen";
 import "./App.css";
 import "./index.css";
 
@@ -46,40 +43,13 @@ function App() {
     getJsonParse(STORAGE_KEY.HISTORY)
   );
 
-  useEffect(() => {
-    let unListenAbout: any;
-    let unListenExport: any;
-    async function f() {
-      unListenAbout = await listen<string>("about", () => {
-        dialog.message("Copyright © 2022 wheatandcat", "This is a todo app.");
-      });
-      unListenExport = await listen<string>("export", async () => {
-        const m = localStorage.getItem(STORAGE_KEY.MARKDOWN) || "";
-        const h = getJsonParse(STORAGE_KEY.HISTORY);
-        const t = getJsonParse(STORAGE_KEY.TASK_LIST);
-        const data = {
-          markdown: m,
-          history: h,
-          tasks: t,
-        };
-
-        const path = await save({ defaultPath: "export-todo.json" });
-        if (path) {
-          writeTextFile(path, JSON.stringify(data));
-        }
-      });
-    }
-    f();
-
-    return () => {
-      if (unListenAbout) {
-        unListenAbout();
-      }
-      if (unListenExport) {
-        unListenExport();
-      }
-    };
-  }, []);
+  useListen({
+    onImportCallback: (markdown, tTasks, history) => {
+      setMarkdown(markdown);
+      setHistory(history);
+      tasks = tTasks;
+    },
+  });
 
   const addHistoryValue = useCallback(
     (markdownValue: string, tasks: Task[]) => {
