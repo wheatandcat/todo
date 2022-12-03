@@ -24,26 +24,29 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                 const checked = c0.props.checked;
                 const taskText = props.children[1];
 
+                const id: string = `checkbox-${taskText}`;
+
                 return (
                   <li {...props}>
-                    <label>
-                      <div className="flex items-center">
-                        <div className="pr-2 pt-1">
-                          <input
-                            type="checkbox"
-                            defaultChecked={checked}
-                            aria-labelledby="task item"
-                            readOnly={false}
-                            onChange={() => {
-                              onChangeTask(checked, taskText);
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <span>{taskText}</span>
-                        </div>
+                    <div className="flex items-center">
+                      <div className="pr-2 pt-1">
+                        <input
+                          id={id}
+                          type="checkbox"
+                          defaultChecked={checked}
+                          aria-labelledby="task item"
+                          readOnly={false}
+                          onChange={() => {
+                            onChangeTask(checked, taskText);
+                          }}
+                        />
                       </div>
-                    </label>
+                      <div>
+                        <label htmlFor={id}>
+                          <span>{taskText}</span>
+                        </label>
+                      </div>
+                    </div>
                   </li>
                 );
               },
