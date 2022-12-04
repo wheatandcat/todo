@@ -39,7 +39,6 @@ const useListen = (props: Props) => {
         if (path) {
           const dataText = await readTextFile(String(path));
           const data: any = JSON.parse(dataText);
-          console.log(data);
 
           localStorage.setItem(STORAGE_KEY.MARKDOWN, data.markdown);
           localStorage.setItem(

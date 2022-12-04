@@ -1,9 +1,10 @@
 import React, { memo } from "react";
 import Markdown from "markdown-to-jsx";
+import List from "./List";
 
 type Props = {
   markdown: string;
-  onChangeTask: (checked: boolean, taskText: string) => void;
+  onChangeTask: (checked: boolean, taskText: string, nest: string[]) => void;
 };
 
 const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
@@ -22,9 +23,20 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                 }
 
                 const checked = c0.props.checked;
-                const taskText = props.children[1];
+                const taskText = props.children[1]
+                  .replaceAll("\n", "")
+                  .replaceAll(" ", "");
 
                 const id: string = `checkbox-${taskText}`;
+
+                const last = props.children.at(-1);
+                let nest: string[] = [];
+
+                if (typeof last !== "string") {
+                  nest = last.props.children.map(
+                    (v: any) => v.props.children[0]
+                  );
+                }
 
                 return (
                   <li {...props}>
@@ -37,7 +49,7 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                           aria-labelledby="task item"
                           readOnly={false}
                           onChange={() => {
-                            onChangeTask(checked, taskText);
+                            onChangeTask(checked, taskText, nest);
                           }}
                         />
                       </div>
@@ -47,6 +59,9 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                         </label>
                       </div>
                     </div>
+                    {nest.map((v: string, index: number) => (
+                      <List key={index} text={v} />
+                    ))}
                   </li>
                 );
               },

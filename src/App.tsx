@@ -7,7 +7,7 @@ import Tabs from "./components/organisms/Tabs";
 import History from "./components/organisms/History";
 import Preview from "./components/organisms/Preview";
 import dayjs from "./lib/dayjs";
-import { getTasks } from "./lib/task";
+import { getTasks, getHistory, removeHistoryInMarkdown } from "./lib/task";
 import { STORAGE_KEY, getJsonParse } from "./lib/storage";
 import useListen from "./hooks/useListen";
 import "./App.css";
@@ -17,6 +17,7 @@ export type Task = {
   depth: number;
   text: string;
   checked: boolean;
+  nest?: string[];
   checkedAt: string | null;
 };
 
@@ -52,15 +53,8 @@ function App() {
   });
 
   const addHistoryValue = useCallback(
-    (markdownValue: string, tasks: Task[]) => {
-      const h = tasks.filter((v) => {
-        if (!v.checkedAt) {
-          return false;
-        }
-
-        return dayjs().diff(dayjs(v.checkedAt), "hour") > 12;
-      });
-
+    (markdownValue: string, tTasks: Task[]) => {
+      const h = getHistory(tTasks);
       if (h.length === 0) {
         return;
       }
@@ -73,19 +67,25 @@ function App() {
 
       const historyTextList = h.map((v) => v.text);
 
-      tasks = tasks.filter((v) => {
+      tasks = tTasks.filter((v) => {
         return !historyTextList.includes(v.text);
       });
       localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(tasks));
 
-      const m = markdownValue
-        .split("\n")
+      const nestText = tTasks
         .filter((v) => {
-          const ng = historyTextList.find((t) => v.includes(t));
-
-          return !ng;
+          return historyTextList.includes(v.text);
         })
-        .join("\n");
+        .map((v) => {
+          return v.nest ?? [];
+        })
+        .flat();
+
+      const m = removeHistoryInMarkdown(
+        markdownValue,
+        historyTextList,
+        nestText
+      );
 
       setMarkdown(m);
       localStorage.setItem(STORAGE_KEY.MARKDOWN, m);
@@ -98,6 +98,7 @@ function App() {
     localStorage.setItem(STORAGE_KEY.MARKDOWN, value);
 
     const file = processor.processSync(value);
+
     const ts = file.data.taskList as Task[];
     localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(ts));
 
@@ -120,12 +121,13 @@ function App() {
   );
 
   const onChangeTask = useCallback(
-    (checked: boolean, taskText: string) => {
+    (checked: boolean, taskText: string, nest: string[]) => {
       tasks = tasks.map((v) => {
         if (v.text === taskText.trim()) {
+          v.nest = nest;
           // この時点ではチェックが入っていないので、チェックが入っているときはチェックが入った日時を記録する
           if (!checked) {
-            v.checkedAt = dayjs().toString();
+            v.checkedAt = dayjs().add(1, "day").toString();
           } else {
             v.checkedAt = null;
           }

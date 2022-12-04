@@ -1,12 +1,7 @@
 import { ListItem, Paragraph, Text } from "mdast";
 import { Node, visit } from "unist-util-visit";
-
-export type Task = {
-  depth: number;
-  text: string;
-  checked: boolean;
-  checkedAt: string | null;
-};
+import dayjs from "./dayjs";
+import { Task } from "../App";
 
 export const getTasks = (root: Node, tTasks: Task[]) => {
   const items: Task[] = [];
@@ -45,8 +40,50 @@ export const getTasks = (root: Node, tTasks: Task[]) => {
       item.checkedAt = checkedAt;
     }
 
+    const nest =
+      tTasks.find((v) => v.text.trim() === item.text.trim())?.nest ?? [];
+    if (nest.length > 0) {
+      item.nest = nest;
+    }
+
     items.push(item);
   });
 
   return items;
+};
+
+export const getHistory = (tTasks: Task[]) => {
+  const h = tTasks.filter((v) => {
+    if (!v.checkedAt) {
+      return false;
+    }
+
+    return dayjs().diff(dayjs(v.checkedAt), "hour") > 12;
+  });
+
+  return h;
+};
+
+export const removeHistoryInMarkdown = (
+  markdownValue: string,
+  historyTextList: string[],
+  nestText: string[]
+) => {
+  const m = markdownValue
+    .split("\n")
+    .filter((v) => {
+      if (["[x]", "[ ]"].find((t) => v.includes(t))) {
+        if (historyTextList.find((t) => v.includes(t))) {
+          return false;
+        }
+      } else {
+        if (nestText.find((t) => v.includes(t))) {
+          return false;
+        }
+      }
+      return true;
+    })
+    .join("\n");
+
+  return m;
 };
