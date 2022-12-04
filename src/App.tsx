@@ -17,6 +17,7 @@ export type Task = {
   depth: number;
   text: string;
   checked: boolean;
+  nest?: string[];
   checkedAt: string | null;
 };
 
@@ -120,9 +121,10 @@ function App() {
   );
 
   const onChangeTask = useCallback(
-    (checked: boolean, taskText: string) => {
+    (checked: boolean, taskText: string, nest: string[]) => {
       tasks = tasks.map((v) => {
         if (v.text === taskText.trim()) {
+          v.nest = nest;
           // この時点ではチェックが入っていないので、チェックが入っているときはチェックが入った日時を記録する
           if (!checked) {
             v.checkedAt = dayjs().toString();
