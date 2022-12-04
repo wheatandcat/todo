@@ -15,7 +15,6 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
           overrides: {
             li: {
               component: (props) => {
-                console.log(props);
                 if (!props.children) return null;
                 const c0 = props.children[0];
 
