@@ -21,7 +21,8 @@
     "remark-parse": "^10.0.1",
     "remark-stringify": "^10.0.2",
     "remark-task-list": "^0.0.3",
-    "unified": "^10.1.2"
+    "unified": "^10.1.2",
+    "util": "^0.12.5"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.1.0",
