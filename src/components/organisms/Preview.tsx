@@ -48,6 +48,10 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
 
                   const isText = last.type !== "a";
 
+                  if (!taskText || taskText === "") {
+                    throw new Error("taskText is empty:", taskText);
+                  }
+
                   return (
                     <li {...props}>
                       <div className="flex items-center">
