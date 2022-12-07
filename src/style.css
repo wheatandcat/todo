@@ -115,6 +115,10 @@ button {
     background-color: #2f2f2f;
   }
 
+  a {
+    color: #91a4de;
+  }
+
   a:hover {
     color: #24c8db;
   }
