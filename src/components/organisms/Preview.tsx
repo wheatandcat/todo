@@ -9,7 +9,7 @@ type Props = {
 
 const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
   return (
-    <div className="border text-left px-5 py-4 mx-4 my-3 min-h-96">
+    <div className="border text-left px-5 py-4 mx-4 my-3 board overflow-y-scroll">
       <Markdown
         options={{
           overrides: {
