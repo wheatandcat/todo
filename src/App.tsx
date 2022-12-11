@@ -10,6 +10,7 @@ import dayjs from "./lib/dayjs";
 import { getTasks, getHistory, removeHistoryInMarkdown } from "./lib/task";
 import { STORAGE_KEY, getJsonParse } from "./lib/storage";
 import useListen from "./hooks/useListen";
+import AppIcon from "./assets/icon.png";
 import "./App.css";
 import "./index.css";
 
@@ -157,7 +158,10 @@ function App() {
 
   return (
     <div className="pt-4 max-w-screen-lg">
-      <div className="text-3xl font-bold text-left px-4 pb-3">TODO LIST</div>
+      <div className="text-2xl font-bold text-left px-4 pb-3 flex logo">
+        <img src={AppIcon} className="inline-block w-8 h-8 mr-2" alt="logo" />
+        <div className="pt-1">TODO LIST</div>
+      </div>
       <Tabs
         items={["プレビュー", "編集", "履歴"]}
         selectedIndex={select}
@@ -169,9 +173,9 @@ function App() {
           return <Preview markdown={markdown} onChangeTask={onChangeTask} />;
         } else if (select === 1) {
           return (
-            <div className="border text-left mx-4 my-3 h-96">
+            <div className="border text-left mx-4 my-3 board">
               <textarea
-                className="bg-inherit w-full h-full px-4 py-4"
+                className="bg-inherit w-full h-full px-4 py-4 board"
                 aria-label="markdown"
                 onChange={(e) => handleChange(e)}
                 defaultValue={markdown}

@@ -9,7 +9,7 @@ type Props = {
 
 const History: React.FC<Props> = (props) => {
   return (
-    <div className="border text-left mx-4 my-3 h-96 overflow-y-scroll">
+    <div className="border text-left mx-4 my-3 history overflow-y-scroll">
       {props.items.map((item, index) => (
         <div key={index} className="m-3 pt-1">
           <div className="text-xs p">
