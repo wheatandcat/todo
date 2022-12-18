@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 
 type Props = {
-  text: string;
+  children: React.ReactNode;
 };
 
 const List: React.FC<Props> = (props) => {
@@ -10,7 +10,7 @@ const List: React.FC<Props> = (props) => {
       <div>
         <span>
           <b>・</b>
-          {props.text}
+          {props.children}
         </span>
       </div>
     </li>

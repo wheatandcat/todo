@@ -1,5 +1,7 @@
 import React, { memo } from "react";
 import Markdown from "markdown-to-jsx";
+import { getTaskText } from "../../lib/task";
+import Item from "../molecules/Item";
 import List from "./List";
 
 type Props = {
@@ -25,7 +27,7 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
 
                   const checked = c0.props.checked;
 
-                  const last = props.children.at(-1);
+                  let last = props.children.at(-1);
                   let nest: string[] = [];
 
                   if (typeof last !== "string" && last.type === "ul") {
@@ -39,14 +41,12 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                     .replaceAll(" ", "");
 
                   if (last.type === "a") {
-                    taskText = last.props.children[0]
-                      .replaceAll("\n", "")
-                      .replaceAll(" ", "");
+                    taskText = getTaskText(last);
                   }
 
                   const id: string = `checkbox-${taskText}`;
 
-                  const isText = last.type !== "a";
+                  const isLink = last.type === "a";
 
                   if (!taskText || taskText === "") {
                     throw new Error("taskText is empty:", taskText);
@@ -69,12 +69,20 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                         </div>
                         <div>
                           <label htmlFor={id}>
-                            <span>{isText ? taskText : last}</span>
+                            <span>
+                              {isLink ? (
+                                <a href={taskText} target="_blank">
+                                  {taskText}
+                                </a>
+                              ) : (
+                                taskText
+                              )}
+                            </span>
                           </label>
                         </div>
                       </div>
                       {nest.map((v: string, index: number) => (
-                        <List key={index} text={v} />
+                        <List key={index}>{v}</List>
                       ))}
                     </li>
                   );
