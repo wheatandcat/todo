@@ -58,7 +58,9 @@ export const getHistory = (tTasks: Task[]) => {
       return false;
     }
 
-    return dayjs().diff(dayjs(v.checkedAt), "hour") > 12;
+    const ok = dayjs().diff(dayjs(v.checkedAt), "hour") > 12;
+
+    return ok;
   });
 
   return h;
@@ -86,4 +88,12 @@ export const removeHistoryInMarkdown = (
     .join("\n");
 
   return m;
+};
+
+export const getTaskText = (v: any): string => {
+  if (v.type === "a") {
+    return v.props.children[0].replaceAll("\n", "").replaceAll(" ", "");
+  }
+
+  return v;
 };

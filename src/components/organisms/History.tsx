@@ -1,34 +1,63 @@
 import React, { memo } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { Task } from "../../App";
 import List from "./List";
 import dayjs from "../../lib/dayjs";
+import Item from "../molecules/Item";
 
 type Props = {
   items: Task[];
 };
 
+function ErrorFallback({ error, resetErrorBoundary }: any) {
+  return (
+    <div role="alert">
+      <p className="text-red-600 font-bold text-sm underline underline-offset-2">
+        ☠️ パースに失敗しました:
+      </p>
+      <pre>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
+}
+
 const History: React.FC<Props> = (props) => {
   return (
     <div className="border text-left mx-4 my-3 history overflow-y-scroll">
-      {props.items.map((item, index) => (
-        <div key={index} className="m-3 pt-1">
-          <div className="text-xs p">
-            {dayjs(item.checkedAt).format("YYYY年MM月DD日 HH:mm")}
-          </div>
-          <div className="text-base font-bold py-2">{item.text}</div>
-          {(item.nest ?? []).length > 0 && (
-            <ul className="text-base font-bold pb-2">
-              {(item.nest ?? []).map((v, index) => (
-                <List key={index} text={v} />
-              ))}
-            </ul>
-          )}
+      {props.items.map((item, index) => {
+        return (
+          <div key={index} className="m-3 pt-1">
+            <div className="text-xs p">
+              {dayjs(item.checkedAt).format("YYYY年MM月DD日 HH:mm")}
+            </div>
+            <div className="text-base font-bold py-2">
+              <Item value={item.text} />
+            </div>
+            {(item?.nest ?? []).length > 0 && (
+              <ErrorBoundary
+                FallbackComponent={ErrorFallback}
+                onReset={() => {
+                  // reset the state of your app so the error doesn't happen again
+                }}
+              >
+                <ul className="text-base font-bold pb-2">
+                  {(item?.nest ?? []).map((v, index) => {
+                    return (
+                      <List key={index}>
+                        <Item type={(v as any).type || ""} value={v} />
+                      </List>
+                    );
+                  })}
+                </ul>
+              </ErrorBoundary>
+            )}
 
-          {props.items.length - 1 !== index && (
-            <div className="border-b pt-1" />
-          )}
-        </div>
-      ))}
+            {props.items.length - 1 !== index && (
+              <div className="border-b pt-1" />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
