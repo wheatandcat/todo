@@ -129,7 +129,7 @@ function App() {
           v.nest = nest;
           // この時点ではチェックが入っていないので、チェックが入っているときはチェックが入った日時を記録する
           if (!checked) {
-            v.checkedAt = dayjs().add(-1, "day").toString();
+            v.checkedAt = dayjs().add(0, "day").toString();
           } else {
             v.checkedAt = null;
           }
