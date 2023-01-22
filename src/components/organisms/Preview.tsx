@@ -1,7 +1,6 @@
 import React, { memo } from "react";
 import Markdown from "markdown-to-jsx";
 import { getTaskText } from "../../lib/task";
-import Item from "../molecules/Item";
 import List from "./List";
 
 type Props = {
