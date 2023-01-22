@@ -178,6 +178,7 @@ function App() {
               <textarea
                 className="bg-inherit w-full h-full px-4 py-4 board"
                 aria-label="markdown"
+                data-testid="input-markdown"
                 onChange={(e) => handleChange(e)}
                 defaultValue={markdown}
               />
