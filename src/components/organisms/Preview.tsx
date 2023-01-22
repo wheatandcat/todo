@@ -12,6 +12,7 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
   return (
     <div className="border text-left px-5 py-4 mx-4 my-3 board overflow-y-scroll">
       <Markdown
+        data-testid="preview"
         options={{
           overrides: {
             li: {
@@ -60,6 +61,7 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                             type="checkbox"
                             defaultChecked={checked}
                             aria-labelledby="task item"
+                            data-testid={`checkbox-${taskText}`}
                             readOnly={false}
                             onChange={() => {
                               onChangeTask(checked, taskText, nest);

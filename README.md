@@ -20,5 +20,18 @@ $ yarn tauri dev
 $ yarn tauri build
 ```
 
+### ユニットテスト
+
+```bash
+$ yarn test
+```
+
+### e2e テスト
+
+```bash
+$ yarn e2e:all
+```
+
 ## デザイン
- - Icons by [Icons8](https://icons8.jp/)
+
+- Icons by [Icons8](https://icons8.jp/)
