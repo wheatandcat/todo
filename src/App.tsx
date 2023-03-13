@@ -6,21 +6,19 @@ import remarkStringify from "remark-stringify";
 import Tabs from "./components/organisms/Tabs";
 import History from "./components/organisms/History";
 import Preview from "./components/organisms/Preview";
+import Debug from "./components/organisms/Debug";
 import dayjs from "./lib/dayjs";
-import { getTasks, getHistory, removeHistoryInMarkdown } from "./lib/task";
+import {
+  Task,
+  getTasks,
+  getHistory,
+  removeHistoryInMarkdown,
+} from "./lib/task";
 import { STORAGE_KEY, getJsonParse } from "./lib/storage";
 import useListen from "./hooks/useListen";
 import AppIcon from "./assets/icon.png";
 import "./App.css";
 import "./index.css";
-
-export type Task = {
-  depth: number;
-  text: string;
-  checked: boolean;
-  nest?: string[];
-  checkedAt: string | null;
-};
 
 var tasks: Task[] = getJsonParse(STORAGE_KEY.TASK_LIST);
 
@@ -164,7 +162,7 @@ function App() {
         <div className="pt-1">TODO LIST</div>
       </div>
       <Tabs
-        items={["プレビュー", "編集", "履歴"]}
+        items={["プレビュー", "編集", "履歴", "データ確認"]}
         selectedIndex={select}
         onSelect={setSelect}
       />
@@ -184,7 +182,7 @@ function App() {
               />
             </div>
           );
-        } else {
+        } else if (select === 2) {
           return (
             <History
               items={history.sort((a, b) =>
@@ -192,6 +190,8 @@ function App() {
               )}
             />
           );
+        } else {
+          return <Debug tasks={tasks} />;
         }
       })()}
     </div>

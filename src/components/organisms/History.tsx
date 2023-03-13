@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Task } from "../../App";
+import { Task } from "../../lib/task";
 import List from "./List";
 import dayjs from "../../lib/dayjs";
 import Item from "../molecules/Item";
