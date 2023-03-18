@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+// @ts-ignore
+import { mockDate } from "./mockdate.ts";
+import dayjs from "dayjs";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -27,5 +30,51 @@ test.describe("Markdownの入力テスト", () => {
     expect(
       await page.locator("data-testid=input-markdown").inputValue()
     ).toMatch("- [x] Task1\n- [ ] Task2");
+  });
+});
+
+test.describe("Markdownの入力した時に、保存されるデータのチェック", () => {
+  test("編集してチェックした時のデータが保存されている", async ({ page }) => {
+    await mockDate(page, "2023-01-01T00:00:00+09:00");
+
+    await page.getByText("編集").click();
+    await page.locator("data-testid=input-markdown").click();
+    await page
+      .locator("data-testid=input-markdown")
+      .fill("- [ ] Task1\n- [ ] Task2\n- [ ] Task3");
+    await page.getByText("プレビュー").click();
+    await page.locator("data-testid=checkbox-Task1").click();
+
+    const taskListValue = await page.evaluate(() => {
+      return localStorage.getItem("taskList");
+    });
+
+    const r = JSON.parse(taskListValue ?? "").map((task: any) => ({
+      ...task,
+      checkedAt: task.checkedAt
+        ? dayjs(task.checkedAt).format("YYYY-MM-DDTHH:mm:ss")
+        : null,
+    }));
+
+    expect(r).toMatchObject([
+      {
+        checked: true,
+        checkedAt: "2023-01-01T00:00:00",
+        depth: 3,
+        text: "Task1",
+      },
+      {
+        checked: false,
+        checkedAt: null,
+        depth: 3,
+        text: "Task2",
+      },
+      {
+        checked: false,
+        checkedAt: null,
+        depth: 3,
+        text: "Task3",
+      },
+    ]);
   });
 });
