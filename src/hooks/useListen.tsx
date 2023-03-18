@@ -4,7 +4,7 @@ import { dialog } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 import { save, open } from "@tauri-apps/api/dialog";
 import { writeTextFile, readTextFile } from "@tauri-apps/api/fs";
-import { Task } from "../App";
+import { Task } from "../lib/task";
 
 type Props = {
   onImportCallback: (markdown: string, tasks: Task[], history: Task[]) => void;

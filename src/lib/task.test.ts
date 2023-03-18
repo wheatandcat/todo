@@ -4,7 +4,7 @@ import { describe, it, expect } from "vitest";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import { getTasks } from "./task";
-import { Task } from "../App";
+import { Task } from "./task";
 
 var tasks: Task[] = [
   {

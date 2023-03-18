@@ -1,14 +1,24 @@
 import { ListItem, Paragraph, Text } from "mdast";
 import { Node, visit } from "unist-util-visit";
 import dayjs from "./dayjs";
-import { Task } from "../App";
+
+export type Task = {
+  depth: number;
+  text: string;
+  checked: boolean;
+  nest?: string[];
+  checkedAt: string | null;
+};
 
 export const getTasks = (root: Node, tTasks: Task[]) => {
   const items: Task[] = [];
 
   visit(root, "listItem", (node: ListItem) => {
     const paragraph = node.children.find((v) => v.type === "paragraph");
-    if (!paragraph) return;
+    if (!paragraph) {
+      console.log("out:", paragraph);
+      return;
+    }
 
     const text = (paragraph as Paragraph).children.find(
       (v) => v.type === "text"
@@ -48,6 +58,8 @@ export const getTasks = (root: Node, tTasks: Task[]) => {
 
     items.push(item);
   });
+
+  console.log("items:", items);
 
   return items;
 };
