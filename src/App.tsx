@@ -123,7 +123,9 @@ function App() {
   const onChangeTask = useCallback(
     (checked: boolean, taskText: string, nest: string[]) => {
       tasks = tasks.map((v) => {
-        if (v.text === taskText.trim()) {
+        const text = v.text.replaceAll(" ", "");
+        console.log("taskText:", taskText, ", text:", text);
+        if (text === taskText) {
           v.nest = nest;
           // この時点ではチェックが入っていないので、チェックが入っているときはチェックが入った日時を記録する
           if (!checked) {
@@ -138,6 +140,19 @@ function App() {
 
       const m = markdown
         .split("\n")
+        .map((v) => {
+          const checkItems = v.split("[x]");
+          if (checkItems.length === 2) {
+            const text = checkItems[1].replaceAll(" ", "");
+            return checkItems[0] + "[x] " + text;
+          }
+          const unCheckItems = v.split("[ ]");
+          if (unCheckItems.length === 2) {
+            const text = unCheckItems[1].replaceAll(" ", "");
+            return unCheckItems[0] + "[ ] " + text;
+          }
+          return v;
+        })
         .map((v) => {
           if (v.includes(taskText)) {
             if (checked) {
