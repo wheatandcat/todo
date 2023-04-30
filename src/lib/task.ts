@@ -1,6 +1,7 @@
 import { ListItem, Paragraph, Text } from "mdast";
 import { Node, visit } from "unist-util-visit";
 import dayjs from "./dayjs";
+import { getItemText } from "./text";
 
 export type Task = {
   depth: number;
@@ -44,7 +45,7 @@ export const getTasks = (root: Node, tTasks: Task[]) => {
     }
 
     const checkedAt = tTasks.find(
-      (v) => v.text.trim() === item.text.trim()
+      (v) => getItemText(v.text) === getItemText(item.text)
     )?.checkedAt;
     if (checkedAt) {
       item.checkedAt = checkedAt;
