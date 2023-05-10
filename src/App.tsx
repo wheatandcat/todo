@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { Node } from "unist-util-visit";
+import { appWindow } from "@tauri-apps/api/window";
 import { unified, VFileWithOutput } from "unified";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
@@ -43,6 +44,24 @@ function App() {
   const [history, setHistory] = useState<Task[]>(
     getJsonParse(STORAGE_KEY.HISTORY)
   );
+
+  useEffect(() => {
+    let focusUnListen: () => void = () => {};
+    async function f() {
+      focusUnListen = await appWindow.listen(
+        "tauri://focus",
+        ({ event, payload }) => {
+          console.log("tauri://focus", event, payload);
+          addHistoryValue(markdown, tasks);
+        }
+      );
+    }
+    f();
+
+    return () => {
+      focusUnListen();
+    };
+  }, []);
 
   useListen({
     onImportCallback: (markdown, tTasks, history) => {

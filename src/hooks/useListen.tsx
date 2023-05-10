@@ -12,9 +12,9 @@ type Props = {
 
 const useListen = (props: Props) => {
   useEffect(() => {
-    let unListenAbout: any;
-    let unListenExport: any;
-    let unListenImport: any;
+    let unListenAbout: () => void = () => {};
+    let unListenExport: () => void = () => {};
+    let unListenImport: () => void = () => {};
     async function f() {
       unListenAbout = await listen<string>("about", () => {
         dialog.message("Copyright © 2022 wheatandcat", "This is a todo app.");
@@ -57,15 +57,9 @@ const useListen = (props: Props) => {
     f();
 
     return () => {
-      if (unListenAbout) {
-        unListenAbout();
-      }
-      if (unListenExport) {
-        unListenExport();
-      }
-      if (unListenImport) {
-        unListenImport();
-      }
+      unListenAbout();
+      unListenExport();
+      unListenImport();
     };
   }, []);
 
