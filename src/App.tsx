@@ -141,7 +141,12 @@ function App() {
   );
 
   const onChangeTask = useCallback(
-    (checked: boolean, taskText: string, nest: string[]) => {
+    (
+      checked: boolean,
+      taskText: string,
+      nest: string[],
+      directHistory: boolean = false
+    ) => {
       tasks = tasks.map((v) => {
         const text = getItemText(v.text);
         if (text === taskText) {
@@ -151,6 +156,10 @@ function App() {
             v.checkedAt = dayjs().add(0, "day").toString();
           } else {
             v.checkedAt = null;
+          }
+          if (directHistory) {
+            v.directHistory = true;
+            v.checkedAt = dayjs().add(0, "day").toString();
           }
         }
 
@@ -185,6 +194,11 @@ function App() {
         .join("\n");
 
       setMarkdown(m);
+
+      // 直接履歴に追加
+      if (directHistory) {
+        addHistoryValue(m, tasks);
+      }
     },
     [markdown]
   );

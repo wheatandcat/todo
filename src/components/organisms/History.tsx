@@ -23,7 +23,10 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 
 const History: React.FC<Props> = (props) => {
   return (
-    <div className="border text-left mx-4 my-3 history overflow-y-scroll">
+    <div
+      className="border text-left mx-4 my-3 history overflow-y-scroll"
+      data-testid="history"
+    >
       {props.items.map((item, index) => {
         return (
           <div key={index} className="m-3 pt-1">
