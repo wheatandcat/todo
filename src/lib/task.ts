@@ -9,6 +9,7 @@ export type Task = {
   checked: boolean;
   nest?: string[];
   checkedAt: string | null;
+  directHistory?: boolean;
 };
 
 export const getTasks = (root: Node, tTasks: Task[]) => {
@@ -71,9 +72,15 @@ export const getHistory = (tTasks: Task[]) => {
       return false;
     }
 
-    const ok = dayjs().diff(dayjs(v.checkedAt), "hour") > 12;
+    if (dayjs().diff(dayjs(v.checkedAt), "hour") > 12) {
+      return true
+    }
 
-    return ok;
+    if (v.directHistory) {
+      return true;
+    }
+    
+    return false;
   });
 
   return h;

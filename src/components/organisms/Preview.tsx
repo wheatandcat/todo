@@ -1,16 +1,69 @@
 import React, { memo } from "react";
 import Markdown from "markdown-to-jsx";
+import {
+  Menu,
+  Item,
+  useContextMenu,
+  TriggerEvent,
+  ItemParams,
+} from "react-contexify";
+import "react-contexify/ReactContexify.css";
 import { getTaskText } from "../../lib/task";
 import List from "./List";
 
 type Props = {
   markdown: string;
-  onChangeTask: (checked: boolean, taskText: string, nest: string[]) => void;
+  onChangeTask: (
+    checked: boolean,
+    taskText: string,
+    nest: string[],
+    directHistory?: boolean
+  ) => void;
 };
 
+const MENU_ID = "context-menu";
+
 const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
+  const { show } = useContextMenu({
+    id: MENU_ID,
+  });
+
+  const handleContextMenu = (
+    event: TriggerEvent,
+    taskText: string,
+    nest: string[]
+  ) => {
+    show({
+      event,
+      props: {
+        taskText,
+        nest,
+      },
+    });
+  };
+
+  const handleItemClick = ({ id, props }: ItemParams) => {
+    switch (id) {
+      case "remove":
+        console.log("remove", props);
+        onChangeTask(true, props.taskText, props.nest, true);
+        break;
+    }
+  };
+
   return (
     <div className="border text-left px-5 py-4 mx-4 my-3 board overflow-y-scroll">
+      <div>
+        <Menu id={MENU_ID}>
+          <Item
+            id="remove"
+            onClick={handleItemClick}
+            data-testid="context-menu-remove"
+          >
+            履歴に追加
+          </Item>
+        </Menu>
+      </div>
       <Markdown
         data-testid="preview"
         options={{
@@ -70,7 +123,11 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                         </div>
                         <div>
                           <label htmlFor={id}>
-                            <span>
+                            <span
+                              onContextMenu={(e) =>
+                                handleContextMenu(e, taskText, nest)
+                              }
+                            >
                               {isLink ? (
                                 <a href={taskText} target="_blank">
                                   {taskText}

@@ -1022,6 +1022,11 @@ cliui@^7.0.2:
     strip-ansi "^6.0.0"
     wrap-ansi "^7.0.0"
 
+clsx@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/clsx/-/clsx-1.2.1.tgz#0ddc4a20a549b59c93a4116bb26f5294ca17dc12"
+  integrity sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==
+
 color-convert@^1.9.0:
   version "1.9.3"
   resolved "https://registry.npmjs.org/color-convert/-/color-convert-1.9.3.tgz"
@@ -2506,6 +2511,13 @@ quick-lru@^5.1.1:
   version "5.1.1"
   resolved "https://registry.npmjs.org/quick-lru/-/quick-lru-5.1.1.tgz"
   integrity sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==
+
+react-contexify@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/react-contexify/-/react-contexify-6.0.0.tgz#52959bb507d6a31224fe870ae147e211e359abe1"
+  integrity sha512-jMhz6yZI81Jv3UDj7TXqCkhdkCFEEmvwGCPXsQuA2ZUC8EbCuVQ6Cy8FzKMXa0y454XTDClBN2YFvvmoFlrFkg==
+  dependencies:
+    clsx "^1.2.1"
 
 react-dom@^18.2.0:
   version "18.2.0"
