@@ -1,11 +1,11 @@
-import React, { memo } from "react";
+import { memo, type FC } from "react";
 import Markdown from "markdown-to-jsx";
 import {
   Menu,
   Item,
   useContextMenu,
-  TriggerEvent,
-  ItemParams,
+  type TriggerEvent,
+  type ItemParams,
 } from "react-contexify";
 import "react-contexify/ReactContexify.css";
 import { getTaskText } from "../../lib/task";
@@ -23,7 +23,7 @@ type Props = {
 
 const MENU_ID = "context-menu";
 
-const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
+const Preview: FC<Props> = ({ markdown, onChangeTask }) => {
   const { show } = useContextMenu({
     id: MENU_ID,
   });
@@ -80,7 +80,7 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
 
                   const checked = c0.props.checked;
 
-                  let last = props.children.at(-1);
+                  const last = props.children.at(-1);
                   let nest: string[] = [];
 
                   if (typeof last !== "string" && last.type === "ul") {
@@ -129,7 +129,11 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                               }
                             >
                               {isLink ? (
-                                <a href={taskText} target="_blank">
+                                <a
+                                  href={taskText}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
                                   {taskText}
                                 </a>
                               ) : (

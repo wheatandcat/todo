@@ -1,49 +1,7 @@
-# TODO アプリ
+# Tauri + React + Typescript
 
-## コマンド
+This template should help get you started developing with Tauri, React and Typescript in Vite.
 
-### ローカル起動
+## Recommended IDE Setup
 
-```bash
-$ yarn dev
-```
-
-### デスクトップアプリでローカル起動
-
-```bash
-$ yarn tauri dev
-```
-
-### デスクトップアプリをビルド
-
-```bash
-$ yarn tauri build
-```
-
-### ユニットテスト
-
-```bash
-$ yarn test
-```
-
-### e2e テスト
-
-```bash
-$ yarn e2e:all
-```
-
-### ローカルで e2e のテスト生成
-
-```bash
-$ yarn playwright codegen  http://127.0.0.1:1420/
-```
-
-#### 確認用
-
-```bash
-$ yarn e2e:chromium --headed
-```
-
-## デザイン
-
-- Icons by [Icons8](https://icons8.jp/)
+- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)

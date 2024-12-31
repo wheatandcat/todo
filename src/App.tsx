@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { Node } from "unist-util-visit";
-import { appWindow } from "@tauri-apps/api/window";
-import { unified, VFileWithOutput } from "unified";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import Tabs from "./components/organisms/Tabs";
@@ -10,7 +9,7 @@ import Preview from "./components/organisms/Preview";
 import Debug from "./components/organisms/Debug";
 import dayjs from "./lib/dayjs";
 import {
-  Task,
+  type Task,
   getTasks,
   getHistory,
   removeHistoryInMarkdown,
@@ -22,10 +21,10 @@ import AppIcon from "./assets/icon.png";
 import "./App.css";
 import "./index.css";
 
-var tasks: Task[] = getJsonParse(STORAGE_KEY.TASK_LIST);
+var tasks: Task[] = getJsonParse(STORAGE_KEY.TASK_LIST) ?? [];
 
 function remarkTasks() {
-  return (node: Node, file: VFileWithOutput<any>) => {
+  return (node: any, file: any) => {
     file.data.taskList = getTasks(node, tasks);
   };
 }
@@ -48,7 +47,7 @@ function App() {
   useEffect(() => {
     let focusUnListen: () => void = () => {};
     async function f() {
-      focusUnListen = await appWindow.listen(
+      focusUnListen = await getCurrentWindow().listen(
         "tauri://focus",
         ({ event, payload }) => {
           console.log("tauri://focus", event, payload);
