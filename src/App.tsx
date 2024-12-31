@@ -60,7 +60,7 @@ function App() {
     return () => {
       focusUnListen();
     };
-  }, []);
+  }, [markdown]);
 
   useListen({
     onImportCallback: (markdown, tTasks, history) => {
@@ -95,10 +95,9 @@ function App() {
         .filter((v) => {
           return historyTextList.includes(v.text);
         })
-        .map((v) => {
+        .flatMap((v) => {
           return v.nest ?? [];
-        })
-        .flat();
+        });
 
       const m = removeHistoryInMarkdown(
         markdownValue,
@@ -109,25 +108,28 @@ function App() {
       setMarkdown(m);
       localStorage.setItem(STORAGE_KEY.MARKDOWN, m);
     },
-    [history]
+    []
   );
 
-  const setValue = useCallback((value: string) => {
-    setMarkdown(value);
-    localStorage.setItem(STORAGE_KEY.MARKDOWN, value);
+  const setValue = useCallback(
+    (value: string) => {
+      setMarkdown(value);
+      localStorage.setItem(STORAGE_KEY.MARKDOWN, value);
 
-    const file = processor.processSync(value);
+      const file = processor.processSync(value);
 
-    const ts = file.data.taskList as Task[];
-    localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(ts));
+      const ts = file.data.taskList as Task[];
+      localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(ts));
 
-    tasks = ts;
-    addHistoryValue(value, tasks);
-  }, []);
+      tasks = ts;
+      addHistoryValue(value, tasks);
+    },
+    [addHistoryValue]
+  );
 
   useEffect(() => {
     setValue(markdown);
-  }, [markdown]);
+  }, [markdown, setValue]);
 
   const handleChange = useCallback(
     async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -136,7 +138,7 @@ function App() {
 
       setMarkdown(value);
     },
-    []
+    [setValue]
   );
 
   const onChangeTask = useCallback(
@@ -144,7 +146,7 @@ function App() {
       checked: boolean,
       taskText: string,
       nest: string[],
-      directHistory: boolean = false
+      directHistory = false
     ) => {
       tasks = tasks.map((v) => {
         const text = getItemText(v.text);
@@ -171,12 +173,12 @@ function App() {
           const checkItems = v.split("[x]");
           if (checkItems.length === 2) {
             const text = getItemText(checkItems[1]);
-            return checkItems[0] + "[x] " + text;
+            return `${checkItems[0]}[x] ${text}`;
           }
           const unCheckItems = v.split("[ ]");
           if (unCheckItems.length === 2) {
             const text = getItemText(unCheckItems[1]);
-            return unCheckItems[0] + "[ ] " + text;
+            return `${unCheckItems[0]}[ ] ${text}`;
           }
           return v;
         })
@@ -184,9 +186,8 @@ function App() {
           if (v.includes(taskText)) {
             if (checked) {
               return v.replace("[x]", "[ ]");
-            } else {
-              return v.replace("[ ]", "[x]");
             }
+            return v.replace("[ ]", "[x]");
           }
           return v;
         })
@@ -199,7 +200,7 @@ function App() {
         addHistoryValue(m, tasks);
       }
     },
-    [markdown]
+    [markdown, addHistoryValue]
   );
 
   return (
@@ -217,7 +218,8 @@ function App() {
       {(() => {
         if (select === 0) {
           return <Preview markdown={markdown} onChangeTask={onChangeTask} />;
-        } else if (select === 1) {
+        }
+        if (select === 1) {
           return (
             <div className="border text-left mx-4 my-3 board">
               <textarea
@@ -229,7 +231,8 @@ function App() {
               />
             </div>
           );
-        } else if (select === 2) {
+        }
+        if (select === 2) {
           return (
             <History
               items={history.sort((a, b) =>
@@ -237,9 +240,8 @@ function App() {
               )}
             />
           );
-        } else {
-          return <Debug tasks={tasks} />;
         }
+        return <Debug tasks={tasks} />;
       })()}
     </div>
   );

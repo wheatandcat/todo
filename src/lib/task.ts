@@ -1,5 +1,6 @@
 import type { ListItem, Paragraph, Text } from "mdast";
 import { visit } from "unist-util-visit";
+import type { Node } from "unist";
 import dayjs from "./dayjs";
 import { getItemText } from "./text";
 
@@ -12,7 +13,7 @@ export type Task = {
   directHistory?: boolean;
 };
 
-export const getTasks = (root: any, tTasks: Task[]) => {
+export const getTasks = (root: Node, tTasks: Task[]) => {
   const items: Task[] = [];
 
   visit(root, "listItem", (node: ListItem) => {
