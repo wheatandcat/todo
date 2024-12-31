@@ -1,9 +1,9 @@
 import { memo, type FC } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import type { Task } from "../../lib/task";
-import List from "./List";
-import dayjs from "../../lib/dayjs";
-import Item from "../molecules/Item";
+import type { Task } from "@/lib/task";
+import dayjs from "@/lib/dayjs";
+import Item from "@/components/molecules/Item";
+import List from "@/components/organisms/List";
 
 type Props = {
   items: Task[];

@@ -1,5 +1,5 @@
 import { memo, type FC } from "react";
-import { getTaskText } from "../../lib/task";
+import { getTaskText } from "@/lib/task";
 
 type Props = {
   type?: string;

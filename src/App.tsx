@@ -3,23 +3,23 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
-import Tabs from "./components/organisms/Tabs";
-import History from "./components/organisms/History";
-import Preview from "./components/organisms/Preview";
-import Debug from "./components/organisms/Debug";
-import dayjs from "./lib/dayjs";
+import Tabs from "@/components/organisms/Tabs";
+import History from "@/components/organisms/History";
+import Preview from "@/components/organisms/Preview";
+import Debug from "@/components/organisms/Debug";
+import dayjs from "@/lib/dayjs";
 import {
   type Task,
   getTasks,
   getHistory,
   removeHistoryInMarkdown,
-} from "./lib/task";
-import { STORAGE_KEY, getJsonParse } from "./lib/storage";
-import useListen from "./hooks/useListen";
-import { getItemText } from "./lib/text";
-import AppIcon from "./assets/icon.png";
-import "./App.css";
-import "./index.css";
+} from "@/lib/task";
+import { STORAGE_KEY, getJsonParse } from "@/lib/storage";
+import useListen from "@/hooks/useListen";
+import { getItemText } from "@/lib/text";
+import AppIcon from "@/assets/icon.png";
+import "@/App.css";
+import "@/index.css";
 
 var tasks: Task[] = getJsonParse(STORAGE_KEY.TASK_LIST) ?? [];
 

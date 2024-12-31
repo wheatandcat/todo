@@ -1,12 +1,12 @@
-import React, { memo, useState } from "react";
-import { Task } from "../../lib/task";
-import dayjs from "../../lib/dayjs";
+import { memo, useState, type FC } from "react";
+import type { Task } from "@/lib/task";
+import dayjs from "@/lib/dayjs";
 
 type Props = {
   tasks: Task[];
 };
 
-const Debug: React.FC<Props> = (props) => {
+const Debug: FC<Props> = (props) => {
   const [checkedData, setCheckedData] = useState(false);
   const [taskName, setTaskName] = useState("");
 

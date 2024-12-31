@@ -8,7 +8,7 @@ import {
   type ItemParams,
 } from "react-contexify";
 import "react-contexify/ReactContexify.css";
-import { getTaskText } from "../../lib/task";
+import { getTaskText } from "@/lib/task";
 import List from "./List";
 
 type Props = {

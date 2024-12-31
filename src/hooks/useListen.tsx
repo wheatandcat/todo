@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { STORAGE_KEY, getJsonParse } from "../lib/storage";
+import { STORAGE_KEY, getJsonParse } from "@/lib/storage";
 import { listen } from "@tauri-apps/api/event";
 import { message, save, open } from "@tauri-apps/plugin-dialog";
 import { writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
-import type { Task } from "../lib/task";
+import type { Task } from "@/lib/task";
 
 type Props = {
   onImportCallback: (markdown: string, tasks: Task[], history: Task[]) => void;
