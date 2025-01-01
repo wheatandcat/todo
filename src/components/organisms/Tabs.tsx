@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo, type FC } from "react";
 
 type Props = {
   items: string[];
@@ -11,7 +11,7 @@ const selectedTabStyle =
 const unselectedTabStyle =
   "inline-block py-4 px-6 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 text-gray-100";
 
-const Tabs: React.FC<Props> = (props) => {
+const Tabs: FC<Props> = (props) => {
   return (
     <div className="text-sm font-medium text-center text-gray-400 border-b border-gray-700 mx-4">
       <ul className="flex flex-wrap -mb-px">

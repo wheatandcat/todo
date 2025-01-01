@@ -1,14 +1,14 @@
-import React, { memo } from "react";
+import { memo, type FC } from "react";
 import Markdown from "markdown-to-jsx";
 import {
   Menu,
   Item,
   useContextMenu,
-  TriggerEvent,
-  ItemParams,
+  type TriggerEvent,
+  type ItemParams,
 } from "react-contexify";
 import "react-contexify/ReactContexify.css";
-import { getTaskText } from "../../lib/task";
+import { getTaskText } from "@/lib/task";
 import List from "./List";
 
 type Props = {
@@ -23,7 +23,7 @@ type Props = {
 
 const MENU_ID = "context-menu";
 
-const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
+const Preview: FC<Props> = ({ markdown, onChangeTask }) => {
   const { show } = useContextMenu({
     id: MENU_ID,
   });
@@ -52,7 +52,7 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
   };
 
   return (
-    <div className="border text-left px-5 py-4 mx-4 my-3 board overflow-y-scroll">
+    <div className="border text-left px-5 py-4 mx-4 my-3 board overflow-y-scroll h-full">
       <div>
         <Menu id={MENU_ID}>
           <Item
@@ -80,7 +80,7 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
 
                   const checked = c0.props.checked;
 
-                  let last = props.children.at(-1);
+                  const last = props.children.at(-1);
                   let nest: string[] = [];
 
                   if (typeof last !== "string" && last.type === "ul") {
@@ -102,7 +102,7 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                   const isLink = last.type === "a";
 
                   if (!taskText || taskText === "") {
-                    throw new Error("taskText is empty:", taskText);
+                    throw new Error(`taskText is empty: ${taskText}`);
                   }
 
                   return (
@@ -129,7 +129,11 @@ const Preview: React.FC<Props> = ({ markdown, onChangeTask }) => {
                               }
                             >
                               {isLink ? (
-                                <a href={taskText} target="_blank">
+                                <a
+                                  href={taskText}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
                                   {taskText}
                                 </a>
                               ) : (

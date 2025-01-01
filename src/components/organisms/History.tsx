@@ -1,9 +1,9 @@
-import React, { memo } from "react";
+import { memo, type FC } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Task } from "../../lib/task";
-import List from "./List";
-import dayjs from "../../lib/dayjs";
-import Item from "../molecules/Item";
+import type { Task } from "@/lib/task";
+import dayjs from "@/lib/dayjs";
+import Item from "@/components/molecules/Item";
+import List from "@/components/organisms/List";
 
 type Props = {
   items: Task[];
@@ -16,15 +16,17 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
         ☠️ パースに失敗しました:
       </p>
       <pre>{error.message}</pre>
-      <button onClick={resetErrorBoundary}>Try again</button>
+      <button type="button" onClick={resetErrorBoundary}>
+        Try again
+      </button>
     </div>
   );
 }
 
-const History: React.FC<Props> = (props) => {
+const History: FC<Props> = (props) => {
   return (
     <div
-      className="border text-left mx-4 my-3 history overflow-y-scroll"
+      className="border text-left mx-4 my-3 history h-full overflow-y-scroll"
       data-testid="history"
     >
       {props.items.map((item, index) => {

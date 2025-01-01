@@ -1,31 +1,30 @@
 import { useState, useCallback, useEffect } from "react";
-import { Node } from "unist-util-visit";
-import { appWindow } from "@tauri-apps/api/window";
-import { unified, VFileWithOutput } from "unified";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
-import Tabs from "./components/organisms/Tabs";
-import History from "./components/organisms/History";
-import Preview from "./components/organisms/Preview";
-import Debug from "./components/organisms/Debug";
-import dayjs from "./lib/dayjs";
+import Tabs from "@/components/organisms/Tabs";
+import History from "@/components/organisms/History";
+import Preview from "@/components/organisms/Preview";
+import Debug from "@/components/organisms/Debug";
+import dayjs from "@/lib/dayjs";
 import {
-  Task,
+  type Task,
   getTasks,
   getHistory,
   removeHistoryInMarkdown,
-} from "./lib/task";
-import { STORAGE_KEY, getJsonParse } from "./lib/storage";
-import useListen from "./hooks/useListen";
-import { getItemText } from "./lib/text";
-import AppIcon from "./assets/icon.png";
-import "./App.css";
-import "./index.css";
+} from "@/lib/task";
+import { STORAGE_KEY, getJsonParse } from "@/lib/storage";
+import useListen from "@/hooks/useListen";
+import { getItemText } from "@/lib/text";
+import AppIcon from "@/assets/icon.png";
+import "@/App.css";
+import "@/index.css";
 
-var tasks: Task[] = getJsonParse(STORAGE_KEY.TASK_LIST);
+var tasks: Task[] = getJsonParse(STORAGE_KEY.TASK_LIST) ?? [];
 
 function remarkTasks() {
-  return (node: Node, file: VFileWithOutput<any>) => {
+  return (node: any, file: any) => {
     file.data.taskList = getTasks(node, tasks);
   };
 }
@@ -48,7 +47,7 @@ function App() {
   useEffect(() => {
     let focusUnListen: () => void = () => {};
     async function f() {
-      focusUnListen = await appWindow.listen(
+      focusUnListen = await getCurrentWindow().listen(
         "tauri://focus",
         ({ event, payload }) => {
           console.log("tauri://focus", event, payload);
@@ -61,7 +60,7 @@ function App() {
     return () => {
       focusUnListen();
     };
-  }, []);
+  }, [markdown]);
 
   useListen({
     onImportCallback: (markdown, tTasks, history) => {
@@ -96,10 +95,9 @@ function App() {
         .filter((v) => {
           return historyTextList.includes(v.text);
         })
-        .map((v) => {
+        .flatMap((v) => {
           return v.nest ?? [];
-        })
-        .flat();
+        });
 
       const m = removeHistoryInMarkdown(
         markdownValue,
@@ -110,25 +108,28 @@ function App() {
       setMarkdown(m);
       localStorage.setItem(STORAGE_KEY.MARKDOWN, m);
     },
-    [history]
+    []
   );
 
-  const setValue = useCallback((value: string) => {
-    setMarkdown(value);
-    localStorage.setItem(STORAGE_KEY.MARKDOWN, value);
+  const setValue = useCallback(
+    (value: string) => {
+      setMarkdown(value);
+      localStorage.setItem(STORAGE_KEY.MARKDOWN, value);
 
-    const file = processor.processSync(value);
+      const file = processor.processSync(value);
 
-    const ts = file.data.taskList as Task[];
-    localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(ts));
+      const ts = file.data.taskList as Task[];
+      localStorage.setItem(STORAGE_KEY.TASK_LIST, JSON.stringify(ts));
 
-    tasks = ts;
-    addHistoryValue(value, tasks);
-  }, []);
+      tasks = ts;
+      addHistoryValue(value, tasks);
+    },
+    [addHistoryValue]
+  );
 
   useEffect(() => {
     setValue(markdown);
-  }, [markdown]);
+  }, [markdown, setValue]);
 
   const handleChange = useCallback(
     async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -137,7 +138,7 @@ function App() {
 
       setMarkdown(value);
     },
-    []
+    [setValue]
   );
 
   const onChangeTask = useCallback(
@@ -145,7 +146,7 @@ function App() {
       checked: boolean,
       taskText: string,
       nest: string[],
-      directHistory: boolean = false
+      directHistory = false
     ) => {
       tasks = tasks.map((v) => {
         const text = getItemText(v.text);
@@ -172,12 +173,12 @@ function App() {
           const checkItems = v.split("[x]");
           if (checkItems.length === 2) {
             const text = getItemText(checkItems[1]);
-            return checkItems[0] + "[x] " + text;
+            return `${checkItems[0]}[x] ${text}`;
           }
           const unCheckItems = v.split("[ ]");
           if (unCheckItems.length === 2) {
             const text = getItemText(unCheckItems[1]);
-            return unCheckItems[0] + "[ ] " + text;
+            return `${unCheckItems[0]}[ ] ${text}`;
           }
           return v;
         })
@@ -185,9 +186,8 @@ function App() {
           if (v.includes(taskText)) {
             if (checked) {
               return v.replace("[x]", "[ ]");
-            } else {
-              return v.replace("[ ]", "[x]");
             }
+            return v.replace("[ ]", "[x]");
           }
           return v;
         })
@@ -200,12 +200,12 @@ function App() {
         addHistoryValue(m, tasks);
       }
     },
-    [markdown]
+    [markdown, addHistoryValue]
   );
 
   return (
-    <div className="pt-4 max-w-screen-lg">
-      <div className="text-2xl font-bold text-left px-4 pb-3 flex logo">
+    <div className="pt-4 max-w-screen-lg app">
+      <div className="text-2xl font-bold text-left px-4 pb-3 flex">
         <img src={AppIcon} className="inline-block w-8 h-8 mr-2" alt="logo" />
         <div className="pt-1">TODO LIST</div>
       </div>
@@ -214,34 +214,36 @@ function App() {
         selectedIndex={select}
         onSelect={setSelect}
       />
-
-      {(() => {
-        if (select === 0) {
-          return <Preview markdown={markdown} onChangeTask={onChangeTask} />;
-        } else if (select === 1) {
-          return (
-            <div className="border text-left mx-4 my-3 board">
-              <textarea
-                className="bg-inherit w-full h-full px-4 py-4 board"
-                aria-label="markdown"
-                data-testid="input-markdown"
-                onChange={(e) => handleChange(e)}
-                defaultValue={markdown}
+      <div className="main">
+        {(() => {
+          if (select === 0) {
+            return <Preview markdown={markdown} onChangeTask={onChangeTask} />;
+          }
+          if (select === 1) {
+            return (
+              <div className="border text-left mx-4 my-3 board h-full">
+                <textarea
+                  className="bg-inherit w-full h-full px-4 py-4 board"
+                  aria-label="markdown"
+                  data-testid="input-markdown"
+                  onChange={(e) => handleChange(e)}
+                  defaultValue={markdown}
+                />
+              </div>
+            );
+          }
+          if (select === 2) {
+            return (
+              <History
+                items={history.sort((a, b) =>
+                  dayjs(a.checkedAt).isBefore(dayjs(b.checkedAt)) ? 1 : -1
+                )}
               />
-            </div>
-          );
-        } else if (select === 2) {
-          return (
-            <History
-              items={history.sort((a, b) =>
-                dayjs(a.checkedAt).isBefore(dayjs(b.checkedAt)) ? 1 : -1
-              )}
-            />
-          );
-        } else {
+            );
+          }
           return <Debug tasks={tasks} />;
-        }
-      })()}
+        })()}
+      </div>
     </div>
   );
 }

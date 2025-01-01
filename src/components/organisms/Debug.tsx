@@ -1,12 +1,12 @@
-import React, { memo, useState } from "react";
-import { Task } from "../../lib/task";
-import dayjs from "../../lib/dayjs";
+import { memo, useState, type FC } from "react";
+import type { Task } from "@/lib/task";
+import dayjs from "@/lib/dayjs";
 
 type Props = {
   tasks: Task[];
 };
 
-const Debug: React.FC<Props> = (props) => {
+const Debug: FC<Props> = (props) => {
   const [checkedData, setCheckedData] = useState(false);
   const [taskName, setTaskName] = useState("");
 
@@ -33,7 +33,7 @@ const Debug: React.FC<Props> = (props) => {
     });
 
   return (
-    <div className="mx-4 pt-3">
+    <div className="mx-4 pt-3 h-full">
       <div className="flex items-center">
         <div className="flex items-center justify-center">
           <div className="pr-2">タスク名:</div>
@@ -41,7 +41,7 @@ const Debug: React.FC<Props> = (props) => {
             type="text"
             className="border border-gray-300 bg-transparent rounded-md p-1 px-2 text-sm"
             onChange={(e) => setTaskName(e.target.value)}
-            aria-Label="filter task name"
+            aria-label="filter task name"
           />
         </div>
         <div className="mx-3">|</div>

@@ -1,5 +1,6 @@
-import { ListItem, Paragraph, Text } from "mdast";
-import { Node, visit } from "unist-util-visit";
+import type { ListItem, Paragraph, Text } from "mdast";
+import { visit } from "unist-util-visit";
+import type { Node } from "unist";
 import dayjs from "./dayjs";
 import { getItemText } from "./text";
 
@@ -73,13 +74,13 @@ export const getHistory = (tTasks: Task[]) => {
     }
 
     if (dayjs().diff(dayjs(v.checkedAt), "hour") > 12) {
-      return true
+      return true;
     }
 
     if (v.directHistory) {
       return true;
     }
-    
+
     return false;
   });
 

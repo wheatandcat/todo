@@ -1,10 +1,9 @@
 import { useEffect } from "react";
-import { STORAGE_KEY, getJsonParse } from "../lib/storage";
-import { dialog } from "@tauri-apps/api";
+import { STORAGE_KEY, getJsonParse } from "@/lib/storage";
 import { listen } from "@tauri-apps/api/event";
-import { save, open } from "@tauri-apps/api/dialog";
-import { writeTextFile, readTextFile } from "@tauri-apps/api/fs";
-import { Task } from "../lib/task";
+import { message, save, open } from "@tauri-apps/plugin-dialog";
+import { writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
+import type { Task } from "@/lib/task";
 
 type Props = {
   onImportCallback: (markdown: string, tasks: Task[], history: Task[]) => void;
@@ -17,9 +16,9 @@ const useListen = (props: Props) => {
     let unListenImport: () => void = () => {};
     async function f() {
       unListenAbout = await listen<string>("about", () => {
-        dialog.message("Copyright © 2022 wheatandcat", "This is a todo app.");
+        message("Copyright © 2022 wheatandcat", "This is a todo app.");
       });
-      unListenExport = await listen<string>("export", async () => {
+      unListenExport = await listen<string>("ev-export", async () => {
         const m = localStorage.getItem(STORAGE_KEY.MARKDOWN) || "";
         const h = getJsonParse(STORAGE_KEY.HISTORY);
         const t = getJsonParse(STORAGE_KEY.TASK_LIST);
@@ -30,11 +29,12 @@ const useListen = (props: Props) => {
         };
 
         const path = await save({ defaultPath: "export-todo.json" });
+        console.log("export", path);
         if (path) {
           writeTextFile(path, JSON.stringify(data));
         }
       });
-      unListenImport = await listen<string>("import", async () => {
+      unListenImport = await listen<string>("ev-import", async () => {
         const path = await open();
         if (path) {
           const dataText = await readTextFile(String(path));
@@ -61,7 +61,7 @@ const useListen = (props: Props) => {
       unListenExport();
       unListenImport();
     };
-  }, []);
+  }, [props.onImportCallback]);
 
   return {};
 };

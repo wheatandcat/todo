@@ -1,10 +1,10 @@
-import React, { memo } from "react";
+import { type FC, type ReactNode, memo } from "react";
 
 type Props = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
-const List: React.FC<Props> = (props) => {
+const List: FC<Props> = (props) => {
   return (
     <li className="pl-2">
       <div>
