@@ -26,7 +26,7 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 const History: FC<Props> = (props) => {
   return (
     <div
-      className="border text-left mx-4 my-3 history overflow-y-scroll"
+      className="border text-left mx-4 my-3 history h-full overflow-y-scroll"
       data-testid="history"
     >
       {props.items.map((item, index) => {

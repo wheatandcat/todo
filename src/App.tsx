@@ -204,8 +204,8 @@ function App() {
   );
 
   return (
-    <div className="pt-4 max-w-screen-lg">
-      <div className="text-2xl font-bold text-left px-4 pb-3 flex logo">
+    <div className="pt-4 max-w-screen-lg app">
+      <div className="text-2xl font-bold text-left px-4 pb-3 flex">
         <img src={AppIcon} className="inline-block w-8 h-8 mr-2" alt="logo" />
         <div className="pt-1">TODO LIST</div>
       </div>
@@ -214,35 +214,36 @@ function App() {
         selectedIndex={select}
         onSelect={setSelect}
       />
-
-      {(() => {
-        if (select === 0) {
-          return <Preview markdown={markdown} onChangeTask={onChangeTask} />;
-        }
-        if (select === 1) {
-          return (
-            <div className="border text-left mx-4 my-3 board">
-              <textarea
-                className="bg-inherit w-full h-full px-4 py-4 board"
-                aria-label="markdown"
-                data-testid="input-markdown"
-                onChange={(e) => handleChange(e)}
-                defaultValue={markdown}
+      <div className="main">
+        {(() => {
+          if (select === 0) {
+            return <Preview markdown={markdown} onChangeTask={onChangeTask} />;
+          }
+          if (select === 1) {
+            return (
+              <div className="border text-left mx-4 my-3 board h-full">
+                <textarea
+                  className="bg-inherit w-full h-full px-4 py-4 board"
+                  aria-label="markdown"
+                  data-testid="input-markdown"
+                  onChange={(e) => handleChange(e)}
+                  defaultValue={markdown}
+                />
+              </div>
+            );
+          }
+          if (select === 2) {
+            return (
+              <History
+                items={history.sort((a, b) =>
+                  dayjs(a.checkedAt).isBefore(dayjs(b.checkedAt)) ? 1 : -1
+                )}
               />
-            </div>
-          );
-        }
-        if (select === 2) {
-          return (
-            <History
-              items={history.sort((a, b) =>
-                dayjs(a.checkedAt).isBefore(dayjs(b.checkedAt)) ? 1 : -1
-              )}
-            />
-          );
-        }
-        return <Debug tasks={tasks} />;
-      })()}
+            );
+          }
+          return <Debug tasks={tasks} />;
+        })()}
+      </div>
     </div>
   );
 }

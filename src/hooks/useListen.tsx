@@ -18,7 +18,7 @@ const useListen = (props: Props) => {
       unListenAbout = await listen<string>("about", () => {
         message("Copyright © 2022 wheatandcat", "This is a todo app.");
       });
-      unListenExport = await listen<string>("export", async () => {
+      unListenExport = await listen<string>("ev-export", async () => {
         const m = localStorage.getItem(STORAGE_KEY.MARKDOWN) || "";
         const h = getJsonParse(STORAGE_KEY.HISTORY);
         const t = getJsonParse(STORAGE_KEY.TASK_LIST);
@@ -29,11 +29,12 @@ const useListen = (props: Props) => {
         };
 
         const path = await save({ defaultPath: "export-todo.json" });
+        console.log("export", path);
         if (path) {
           writeTextFile(path, JSON.stringify(data));
         }
       });
-      unListenImport = await listen<string>("import", async () => {
+      unListenImport = await listen<string>("ev-import", async () => {
         const path = await open();
         if (path) {
           const dataText = await readTextFile(String(path));
@@ -60,7 +61,7 @@ const useListen = (props: Props) => {
       unListenExport();
       unListenImport();
     };
-  }, []);
+  }, [props.onImportCallback]);
 
   return {};
 };

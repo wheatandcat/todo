@@ -1,9 +1,7 @@
 use tauri::{
-    menu::{Menu, MenuItem, PredefinedMenuItem, SubmenuBuilder, MenuId, Submenu },
+    menu::{Menu, MenuId, MenuItem, PredefinedMenuItem, Submenu, SubmenuBuilder},
     tray::TrayIconBuilder,
-    AppHandle,
-    Wry,
-    Error,
+    AppHandle, Error, Wry,
 };
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -18,9 +16,7 @@ pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
             let _ = app.set_menu(get_menu(app.handle())?);
-            app.on_menu_event(|handle, ev| { run_menu_process(handle, ev.id().as_ref()) });
-
-            
+            app.on_menu_event(|handle, ev| run_menu_process(handle, ev.id().as_ref()));
 
             // メニューの追加
             let hide_i = MenuItem::with_id(app, "hide", "Hide", true, None::<&str>)?;
@@ -57,15 +53,29 @@ pub fn run() {
 
 fn get_menu(handle: &AppHandle) -> Result<Menu<Wry>, Error> {
     let menu = Menu::new(handle)?;
+    let _ = menu.append(&get_main_file(handle)?)?;
     let _ = menu.append(&get_menu_file(handle)?)?;
     let _ = menu.append(&get_menu_edit(handle)?)?;
     Ok(menu)
 }
+
+fn get_main_file(handle: &AppHandle) -> Result<Submenu<Wry>, Error> {
+    SubmenuBuilder::new(handle, "Todo")
+        .text(MenuId::new("id_about"), "About")
+        .separator()
+        .build()
+}
+
 fn get_menu_file(handle: &AppHandle) -> Result<Submenu<Wry>, Error> {
     SubmenuBuilder::new(handle, "File")
         .items(&[
             &MenuItem::with_id(handle, MenuId::new("id_new"), "New", true, Some("Ctrl+N"))?,
             &MenuItem::with_id(handle, MenuId::new("id_open"), "Open", true, Some("Ctrl+O"))?,
+        ])
+        .separator()
+        .items(&[
+            &MenuItem::with_id(handle, MenuId::new("id_export"), "Export", true, None::<&str>)?,
+            &MenuItem::with_id(handle, MenuId::new("id_import"), "Import", true, None::<&str>)?,
         ])
         .separator()
         .text(MenuId::new("id_quit"), "Quit")
@@ -77,19 +87,40 @@ fn get_menu_edit(handle: &AppHandle) -> Result<Submenu<Wry>, Error> {
         .copy()
         .paste()
         .separator()
-        .item(&MenuItem::with_id(handle,MenuId::new("id_sp"), "Special Edit", true, None::<&str>)?)
+        .item(&MenuItem::with_id(
+            handle,
+            MenuId::new("id_sp"),
+            "Special Edit",
+            true,
+            None::<&str>,
+        )?)
         .build()
 }
 fn run_menu_process(handle: &AppHandle, id: &str) {
     use tauri::Emitter;
     match id {
-        "id_new" => { let _ = handle.emit_to("main", "ev-new", "trigger new menu process"); },
-        "id_open" => { let _ = handle.emit_to("main", "ev-open", "trigger open menu process"); },
-        "id_sp" => { let _ = handle.emit_to("main", "ev-sp", "trigger sp menu process"); },
+        "id_about" => {
+            let _ = handle.emit_to("main", "ev-about", "trigger about menu process");
+        }
+        "id_new" => {
+            let _ = handle.emit_to("main", "ev-new", "trigger new menu process");
+        }
+        "id_open" => {
+            let _ = handle.emit_to("main", "ev-open", "trigger open menu process");
+        }
+        "id_sp" => {
+            let _ = handle.emit_to("main", "ev-sp", "trigger sp menu process");
+        }
         "id_quit" => {
             handle.cleanup_before_exit();
             std::process::exit(0);
-        },
-        _ => {},
+        }
+        "id_export" => {
+            let _ = handle.emit_to("main", "ev-export", "trigger export menu process");
+        }
+        "id_import" => {
+            let _ = handle.emit_to("main", "ev-import", "trigger import menu process");
+        }
+        _ => {}
     }
 }

@@ -21,6 +21,14 @@
   -webkit-text-size-adjust: 100%;
 }
 
+.app {
+  height: 600px;
+}
+
+.main {
+  height: 420px;
+}
+
 .container {
   margin: 0;
   padding-top: 10vh;

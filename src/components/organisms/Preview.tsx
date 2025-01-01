@@ -52,7 +52,7 @@ const Preview: FC<Props> = ({ markdown, onChangeTask }) => {
   };
 
   return (
-    <div className="border text-left px-5 py-4 mx-4 my-3 board overflow-y-scroll">
+    <div className="border text-left px-5 py-4 mx-4 my-3 board overflow-y-scroll h-full">
       <div>
         <Menu id={MENU_ID}>
           <Item
@@ -102,7 +102,7 @@ const Preview: FC<Props> = ({ markdown, onChangeTask }) => {
                   const isLink = last.type === "a";
 
                   if (!taskText || taskText === "") {
-                    throw new Error("taskText is empty:", taskText);
+                    throw new Error(`taskText is empty: ${taskText}`);
                   }
 
                   return (
