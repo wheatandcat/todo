@@ -10,18 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: 16.x
-          cache: yarn
+          version: 9
       - name: Cache node_modules
         uses: actions/cache@v3
         with:
-          path: ~/.cache/yarn
-          key: ${{ runner.os }}-todo-${{ hashFiles(format('{0}{1}', github.workspace, '/yarn.lock')) }}
+          path: ~/.cache/pnpm
+          key: ${{ runner.os }}-todo-${{ hashFiles(format('{0}{1}', github.workspace, '/pnpm-lock.yaml')) }}
           restore-keys: ${{ runner.os }}-todo-
       - name: Install node_modules
         if: steps.cache.outputs.cache-hit != 'true'
-        run: yarn install
+        run: pnpm install
       - name: test
-        run: TZ=Asia/Tokyo yarn test
+        run: TZ=Asia/Tokyo pnpm test

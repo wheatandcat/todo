@@ -5,43 +5,43 @@
 ### ローカル起動
 
 ```bash
-$ yarn dev
+$ pnpm dev
 ```
 
 ### デスクトップアプリでローカル起動
 
 ```bash
-$ yarn tauri dev
+$ pnpm tauri dev
 ```
 
 ### デスクトップアプリをビルド
 
 ```bash
-$ yarn tauri build
+$ pnpm tauri build
 ```
 
 ### ユニットテスト
 
 ```bash
-$ yarn test
+$ pnpm test
 ```
 
 ### e2e テスト
 
 ```bash
-$ yarn e2e:all
+$ pnpm e2e:all
 ```
 
 ### ローカルで e2e のテスト生成
 
 ```bash
-$ yarn playwright codegen  http://127.0.0.1:1420/
+$ pnpm playwright codegen  http://127.0.0.1:1420/
 ```
 
 #### 確認用
 
 ```bash
-$ yarn e2e:chromium --headed
+$ pnpm e2e:chromium --headed
 ```
 
 ## デザイン
