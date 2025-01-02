@@ -13,14 +13,19 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 9
-      - name: Cache node_modules
-        uses: actions/cache@v3
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
         with:
-          path: ~/.cache/pnpm
-          key: ${{ runner.os }}-todo-${{ hashFiles(format('{0}{1}', github.workspace, '/pnpm-lock.yaml')) }}
-          restore-keys: ${{ runner.os }}-todo-
-      - name: Install node_modules
-        if: steps.cache.outputs.cache-hit != 'true'
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
         run: pnpm install
       - name: test
         run: TZ=Asia/Tokyo pnpm test
